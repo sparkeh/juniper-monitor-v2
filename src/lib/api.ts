@@ -24,6 +24,7 @@ export interface CheckResult {
   category: string
   status: string
   message?: string
+  raw_output?: string
   created_at: string
 }
 

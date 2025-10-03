@@ -25,6 +25,7 @@ export default function Layout() {
 
   const navItems = [
     { path: '/', icon: Home, label: 'Dashboard' },
+    { path: '/devices', icon: Server, label: 'Devices' },
     { path: '/alerts', icon: AlertTriangle, label: 'Alerts' },
   ]
 

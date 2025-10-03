@@ -9,7 +9,10 @@ import {
   Clock,
   RefreshCw,
   Wifi,
-  WifiOff
+  WifiOff,
+  Terminal,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 
 export default function DeviceDetail() {
@@ -20,6 +23,8 @@ export default function DeviceDetail() {
   const [loading, setLoading] = useState(true)
   const [pinging, setPinging] = useState(false)
   const [polling, setPolling] = useState(false)
+  const [expandedChecks, setExpandedChecks] = useState<Set<number>>(new Set())
+  const [showRawOutput, setShowRawOutput] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     if (id) {
@@ -98,6 +103,35 @@ export default function DeviceDetail() {
       default:
         return 'text-gray-600'
     }
+  }
+
+  const toggleExpanded = (checkId: number) => {
+    const newExpanded = new Set(expandedChecks)
+    if (newExpanded.has(checkId)) {
+      newExpanded.delete(checkId)
+    } else {
+      newExpanded.add(checkId)
+    }
+    setExpandedChecks(newExpanded)
+  }
+
+  const toggleRawOutput = (checkId: number) => {
+    const newShowRaw = new Set(showRawOutput)
+    if (newShowRaw.has(checkId)) {
+      newShowRaw.delete(checkId)
+    } else {
+      newShowRaw.add(checkId)
+    }
+    setShowRawOutput(newShowRaw)
+  }
+
+  const formatRawOutput = (output: string) => {
+    if (!output) return 'No output available'
+    return output.split('\n').map((line, index) => (
+      <div key={index} className="font-mono text-xs text-gray-600">
+        {line}
+      </div>
+    ))
   }
 
   if (loading) {
@@ -185,7 +219,12 @@ export default function DeviceDetail() {
 
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Recent Checks</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900">Recent Checks</h3>
+            <div className="text-sm text-gray-500">
+              {checks.length} check{checks.length !== 1 ? 's' : ''}
+            </div>
+          </div>
         </div>
         <div className="divide-y divide-gray-200">
           {checks.length === 0 ? (
@@ -201,6 +240,12 @@ export default function DeviceDetail() {
                     <span className="ml-2 font-medium text-gray-900 capitalize">
                       {check.category}
                     </span>
+                    <button
+                      onClick={() => toggleExpanded(check.id)}
+                      className="ml-2 text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      {expandedChecks.has(check.id) ? 'Collapse' : 'Details'}
+                    </button>
                   </div>
                   <div className="flex items-center space-x-4">
                     <span className={`text-sm font-medium ${getStatusColor(check.status)}`}>
@@ -211,8 +256,48 @@ export default function DeviceDetail() {
                     </span>
                   </div>
                 </div>
-                {check.message && (
-                  <p className="mt-1 text-sm text-gray-600">{check.message}</p>
+                
+                {expandedChecks.has(check.id) && (
+                  <div className="mt-3 space-y-3">
+                    {check.message && (
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <p className="text-sm text-gray-700">
+                          <strong>Message:</strong> {check.message}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {check.raw_output && (
+                      <div className="bg-gray-900 text-white p-3 rounded-md">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-300">
+                            Raw SSH Output
+                          </span>
+                          <button
+                            onClick={() => toggleRawOutput(check.id)}
+                            className="flex items-center text-gray-400 hover:text-white text-xs"
+                          >
+                            {showRawOutput.has(check.id) ? (
+                              <>
+                                <EyeOff className="w-3 h-3 mr-1" />
+                                Hide
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3 h-3 mr-1" />
+                                Show
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        {showRawOutput.has(check.id) && (
+                          <div className="font-mono text-xs overflow-x-auto">
+                            {formatRawOutput(check.raw_output)}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             ))

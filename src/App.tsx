@@ -4,6 +4,7 @@ import { WebSocketProvider } from './contexts/WebSocketContext'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import Devices from './pages/Devices'
 import DeviceDetail from './pages/DeviceDetail'
 import Alerts from './pages/Alerts'
 
@@ -16,6 +17,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
+              <Route path="devices" element={<Devices />} />
               <Route path="device/:id" element={<DeviceDetail />} />
               <Route path="alerts" element={<Alerts />} />
             </Route>

@@ -1,6 +1,6 @@
 from cryptography.fernet import Fernet, InvalidToken
 from hashlib import sha256
-from .config import settings
+from ..config import settings
 
 # Derive a 32-byte key from SECRET_KEY
 _key = sha256(settings.secret_key.encode("utf-8")).digest()

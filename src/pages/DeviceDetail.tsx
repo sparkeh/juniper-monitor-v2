@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { api, Device, CheckResult, PingResult } from '../lib/api'
+import CheckDetails from '../components/CheckDetails'
 import { 
   ArrowLeft, 
   CheckCircle, 
@@ -123,6 +124,15 @@ export default function DeviceDetail() {
       newShowRaw.add(checkId)
     }
     setShowRawOutput(newShowRaw)
+  }
+
+  const parseDetails = (rawOutput: string) => {
+    if (!rawOutput) return null
+    try {
+      return JSON.parse(rawOutput)
+    } catch {
+      return null
+    }
   }
 
   const formatRawOutput = (output: string) => {
@@ -267,36 +277,11 @@ export default function DeviceDetail() {
                       </div>
                     )}
                     
-                    {check.raw_output && (
-                      <div className="bg-gray-900 text-white p-3 rounded-md">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-300">
-                            Raw SSH Output
-                          </span>
-                          <button
-                            onClick={() => toggleRawOutput(check.id)}
-                            className="flex items-center text-gray-400 hover:text-white text-xs"
-                          >
-                            {showRawOutput.has(check.id) ? (
-                              <>
-                                <EyeOff className="w-3 h-3 mr-1" />
-                                Hide
-                              </>
-                            ) : (
-                              <>
-                                <Eye className="w-3 h-3 mr-1" />
-                                Show
-                              </>
-                            )}
-                          </button>
-                        </div>
-                        {showRawOutput.has(check.id) && (
-                          <div className="font-mono text-xs overflow-x-auto">
-                            {formatRawOutput(check.raw_output)}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <CheckDetails
+                      category={check.category}
+                      details={parseDetails(check.raw_output || '')}
+                      rawOutput={check.raw_output}
+                    />
                   </div>
                 )}
               </div>

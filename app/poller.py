@@ -64,10 +64,14 @@ def poll_device(db: Session, device: Device) -> None:
 		try:
 			code, out, err = ssh.run_command(cmd)
 			raw = out if out else err
-			status, message = parser(raw)
+			status, message, details = parser(raw)
 			if code != 0 and status == "ok":
 				status = "warn"
-			result = CheckResult(device_id=device.id, category=category, status=status, message=message, raw_output=raw)
+			
+			# Store details as JSON in the raw_output field for now
+			import json
+			details_json = json.dumps(details) if details else ""
+			result = CheckResult(device_id=device.id, category=category, status=status, message=message, raw_output=details_json)
 			db.add(result)
 			
 			# Create alert for critical issues
